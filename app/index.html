@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+
+    <script src="/app/js/vendor.js"></script>
+    <script src="/app/js/main.js"></script>
+    <script type="text/javascript">
+      function start() {}
+      function removeUser() {}
+      (function() {
+        // var message = {};
+        var con = console;
+        var realLog = con.log;
+        var realInfo = con.info;
+        var realError = con.error;
+        var realException = con.exception;
+
+        con.log = function(message) {
+          _print(arguments);
+          realLog.apply(con, arguments);
+        };
+        con.info = function(message) {
+          _print(arguments);
+          realLog.apply(con, arguments);
+        };
+        con.error = function(message) {
+          _print(arguments);
+          realLog.apply(con, arguments);
+        };
+        con.exception = function(message) {
+          _print(arguments);
+          realLog.apply(con, arguments);
+        };
+        _print = function() {
+          var message = {};
+          document.getElementById("zd_log").innerHTML +=
+            "<p>" + JSON.stringify(arguments) + "</p>";
+        };
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- <video sytle="display:none;" id="previewVideo"></video> -->
+    <!-- <audio id="zd_audio" controls="controls" ></audio> -->
+    <audio id="zd_audio"></audio>
+    <!-- <audio id="zd_audio" controls="controls">
+      <source id="zd_audioSource" src="">
+      </source>
+      Your browser does not support the audio format.
+    </audio> -->
+    Existing room Id -
+    <input type="text" id="zd_roomId" value="1555938141351" />
+    <button onclick="start()">Start</button>
+    <button onclick="removeUser()">RemoveUser</button>
+    <div id="zd_log"></div>
+  </body>
+</html>
