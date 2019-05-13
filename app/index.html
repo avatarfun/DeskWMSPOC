@@ -9,41 +9,29 @@
     <script src="/app/js/vendor.js"></script>
     <script src="/app/js/main.js"></script>
     <script type="text/javascript">
-      function start() {}
-      function removeUser() {}
-      (function() {
-        // var message = {};
-        var con = console;
-        var realLog = con.log;
-        var realInfo = con.info;
-        var realError = con.error;
-        var realException = con.exception;
-
-        con.log = function(message) {
-          _print(arguments);
-          realLog.apply(con, arguments);
-        };
-        con.info = function(message) {
-          _print(arguments);
-          realLog.apply(con, arguments);
-        };
-        con.error = function(message) {
-          _print(arguments);
-          realLog.apply(con, arguments);
-        };
-        con.exception = function(message) {
-          _print(arguments);
-          realLog.apply(con, arguments);
-        };
-        _print = function() {
-          var message = {};
-          document.getElementById("zd_log").innerHTML +=
-            "<p>" + JSON.stringify(arguments) + "</p>";
-        };
-      })();
+      function init() {
+        let resp = POC.Actions.getExistingCredentials();
+        showResp('credentials', JSON.stringify(resp));
+        console.log(resp);
+      }
+      function createNewCredentials() {
+        POC.Operations.getNewCredentials().then(resp => {
+          showResp('credentials', JSON.stringify(resp));
+        });
+      }
+      function showResp(id, resp) {
+        document.getElementById(id).innerText = resp;
+      }
+      function getUserMedia() {
+        return POC.Actions.getUserMediaPermission();
+      }
+      function createNewRTCPeerConnection() {
+        POC.Actions.createNewRTCPeerConnection();
+      }
+      function makeCall() {}
     </script>
   </head>
-  <body>
+  <body onload="init()">
     <!-- <video sytle="display:none;" id="previewVideo"></video> -->
     <!-- <audio id="zd_audio" controls="controls" ></audio> -->
     <audio id="zd_audio"></audio>
@@ -52,10 +40,56 @@
       </source>
       Your browser does not support the audio format.
     </audio> -->
-    Existing room Id -
-    <input type="text" id="zd_roomId" value="1555938141351" />
-    <button onclick="start()">Start</button>
-    <button onclick="removeUser()">RemoveUser</button>
-    <div id="zd_log"></div>
+    <div>
+      Existing Credentials :
+      <span id="credentials"></span><br />
+
+      <button onclick="createNewCredentials();">create new Credentials</button>
+    </div>
+
+    <div>
+      <button onclick="getUserMedia();">
+        getUserMedia
+      </button>
+    </div>
+    <div>
+      <button onclick="createNewRTCPeerConnection();">
+        Make RTCPeerConnection
+      </button>
+      <button onclick="makeCall();">Call</button>
+    </div>
+    <div id="zd_log" style="display:none"></div>
   </body>
+  <!-- <script>
+    (function() {
+      // var message = {};
+      var con = console;
+      var realLog = con.log;
+      var realInfo = con.info;
+      var realError = con.error;
+      var realException = con.exception;
+
+      con.log = function(message) {
+        _print(arguments);
+        realLog.apply(con, arguments);
+      };
+      con.info = function(message) {
+        _print(arguments);
+        realLog.apply(con, arguments);
+      };
+      con.error = function(message) {
+        _print(arguments);
+        realLog.apply(con, arguments);
+      };
+      con.exception = function(message) {
+        _print(arguments);
+        realLog.apply(con, arguments);
+      };
+      _print = function() {
+        var message = {};
+        document.getElementById('zd_log').innerHTML +=
+          '<p>' + JSON.stringify(arguments) + '</p>';
+      };
+    })();
+  </script> -->
 </html>

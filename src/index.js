@@ -1,2 +1,2 @@
-import { default as zd_wrapper } from './zdcodes/wrapper_way1';
-window.zd_wrapper = zd_wrapper;
+import { default as POC } from './deskSDK/impl/way1';
+window.POC = POC;

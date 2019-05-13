@@ -1,7 +1,7 @@
-import { createRoom, getUser, createUser, deleteUser } from "./API/APIActions";
+import { createRoom, getUser, createUser, deleteUser } from './API/APIActions';
 const _requiredMedium = { audio: true, video: true };
 window.cmServer = undefined;
-window.serverUrl = "https://showtimeconf.csez.zohocorpin.com:8443";
+window.serverUrl = 'https://showtimeconf.csez.zohocorpin.com:8443';
 window.toMonitoringServer = false;
 window.logConnection = false;
 window.med_ch = undefined;
@@ -16,7 +16,7 @@ window.med_conf = undefined;
 window.confInstance = undefined;
 
 const ST_POC = {
-  roomId: "",
+  roomId: '',
   userId: undefined,
   start: function(userName = `Avatar_${new Date().getTime()}`) {
     const _cbk = roomId => {
@@ -25,13 +25,13 @@ const ST_POC = {
         console.log(resp);
         prossResp1(resp);
       };
-      if (ST_POC.userId === undefined || ST_POC.userId === "") {
+      if (ST_POC.userId === undefined || ST_POC.userId === '') {
         ST_POC.Operations.createNewUser(userName, roomId).then(_cbk1);
       } else {
         getUser(roomId, ST_POC.userId).then(_cbk1);
       }
     };
-    if (ST_POC.roomId === undefined || ST_POC.roomId === "") {
+    if (ST_POC.roomId === undefined || ST_POC.roomId === '') {
       ST_POC.Operations.createNewRoom().then(_cbk);
     }
     _cbk(ST_POC.roomId);
@@ -46,7 +46,7 @@ const ST_POC = {
         });
     },
     createNewUser: function(userName, roomId) {
-      const role = "Member";
+      const role = 'Member';
       const userAppProperty = { name: userName, role: role };
       const userPermission = {
         publish: true,
@@ -104,7 +104,7 @@ const _constructModule = function(
 ) {
   try {
     let module = {};
-    if (clientId == "ST") {
+    if (clientId == 'ST') {
       clientId = 12345;
     }
     module.clientId = clientId;
@@ -142,16 +142,16 @@ const prossResp1 = function(response) {
     } = propertyList;
     const userObj = new z_user(userId, appProperty, permissionProperties);
     const userMiniModule = _constructModule(
-      "ST",
+      'ST',
       user,
-      "user",
+      'user',
       new Date().getTime(),
       appProperty,
       null
     ); //no i18n
     _pushMiniModule(module, userMiniModule);
     _getUserMediaPermission().then(resp => {
-      console.log("resp : ", resp);
+      console.log('resp : ', resp);
       _initCommunicationServer(ST_POC.roomId, userObj);
 
       // //to monitoring server
@@ -191,7 +191,7 @@ const _getUserMediaDetails = function() {
       .enumerateDevices()
       .then(devices => {
         devices.forEach(device => {
-          if (device.kind == "audioinput") {
+          if (device.kind == 'audioinput') {
             var _deviceData = { kind: device.kind, deviceId: device.deviceId };
             if (device.label && device.label.length > 0) {
               _deviceData.name = device.label;
@@ -209,7 +209,7 @@ const _getUserMediaDetails = function() {
               //                            console.log("something",something);
             }
           }
-          if (device.kind == "videoinput") {
+          if (device.kind == 'videoinput') {
             var _deviceData = { kind: device.kind, deviceId: device.deviceId };
             if (device.label && device.label.length > 0) {
               _deviceData.name = device.label;
@@ -224,7 +224,7 @@ const _getUserMediaDetails = function() {
               var _device = { deviceId: exact };
               gumConstraints.video = _device;
             } catch (something) {
-              console.log("something", something);
+              console.log('something', something);
             }
             // gumConstraints.video.deviceId = exact;
           }
@@ -248,9 +248,9 @@ const _getUserMediaPermission = function() {
 
 const _updateAudioSteamToDOMEle = function(stream) {
   // new Promise((_succ, _fail) => {
-  const $audio = document.getElementById("zd_audio");
+  const $audio = document.getElementById('zd_audio');
   // const $source = document.getElementById('zd_audioSource');
-  if (media_channel.webRTCAdapter.browserDetails.browser === "chrome") {
+  if (media_channel.webRTCAdapter.browserDetails.browser === 'chrome') {
     try {
       $audio.srcObject = stream;
     } catch (exception) {}
@@ -316,12 +316,12 @@ const _initCommunicationServer = function(roomId, userObj) {
   };
 
   cmServer.Events.onMessage = function(e) {
-    console.log("cmServer onMessage : ", e);
+    console.log('cmServer onMessage : ', e);
     // addChat(e);
   };
 
   cmServer.Events.onJoinedRoom = function(e) {
-    console.log("cmServer onJoinedRoom : ", e);
+    console.log('cmServer onJoinedRoom : ', e);
     // let add = true;
     // addOrRemoveUser(e.user, add, e.time, e);
     // if (whiteboard) {
@@ -332,7 +332,7 @@ const _initCommunicationServer = function(roomId, userObj) {
   };
 
   cmServer.Events.onLeftRoom = function(e) {
-    console.log("cmServer onLeftRoom : ", e);
+    console.log('cmServer onLeftRoom : ', e);
     // let add = false;
     // addOrRemoveUser(e.user, add, e.time, e);
     // if (whiteboard) {
@@ -344,7 +344,7 @@ const _initCommunicationServer = function(roomId, userObj) {
 
   cmServer.Events.onNewUser = function(e) {
     cmServer.users.push(e);
-    console.log("cmServer onNewUser : ", e);
+    console.log('cmServer onNewUser : ', e);
     // let videoFooter = document.getElementById(`footer-${e.userId}`);
     // if (videoFooter) {
     //   videoFooter.innerHTML = textify(e.appProperty.name);
@@ -356,7 +356,7 @@ const _initCommunicationServer = function(roomId, userObj) {
   };
 
   cmServer.Events.onMediaServerUp = function() {
-    console.log("cmServer onMediaServerUp ");
+    console.log('cmServer onMediaServerUp ');
     // if (
     //   !document.getElementById('server-down').classList.contains('d-none-imp')
     // ) {
@@ -366,7 +366,7 @@ const _initCommunicationServer = function(roomId, userObj) {
   };
 
   cmServer.Events.onMediaServerDown = function() {
-    console.log("cmServer onMediaServerDown ");
+    console.log('cmServer onMediaServerDown ');
     if (med_ch) {
       //here, though connection doesnt exist...request to destroy the connection can still be sent.
       let sendReq = false; //media server is down. no point in sending request.
@@ -385,7 +385,7 @@ const _initCommunicationServer = function(roomId, userObj) {
   cmServer.init(roomId);
 
   cmServer.Events.onDisconnect = function(e) {
-    console.log("cmServer onDisconnect : ", e);
+    console.log('cmServer onDisconnect : ', e);
     setTimeout(() => {
       cmServer.connect(userObj.userId);
     }, 3000);
@@ -393,11 +393,11 @@ const _initCommunicationServer = function(roomId, userObj) {
 
   cmServer.Events.sseinitfailed = function(e) {
     // window.alert("Failed to init SSE. Server down?"); //no i18n
-    console.log("cmServer sseinitfailed : ", e);
+    console.log('cmServer sseinitfailed : ', e);
     let messageObj = {};
-    messageObj.title = "Oops!"; //no i18n
-    messageObj.content = "Failed to init SSE. Server down?"; //no i18n
-    openModalDialog("error", messageObj); //no i18n
+    messageObj.title = 'Oops!'; //no i18n
+    messageObj.content = 'Failed to init SSE. Server down?'; //no i18n
+    openModalDialog('error', messageObj); //no i18n
   };
 };
 // const _checkIfUserHasPermission = function(userObj, permissionProperty) {
@@ -416,9 +416,9 @@ const _initMediaChannel = function(cmServer) {
   med_ch.Events.onConnect = function(connection) {
     debugger;
     let connectionModule = _constructModule(
-      "ST",
+      'ST',
       connection.connectionId,
-      "session",
+      'session',
       new Date().getTime(),
       null,
       null
