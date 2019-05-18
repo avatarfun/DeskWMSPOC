@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -8,28 +7,7 @@
 
     <script src="/app/js/vendor.js"></script>
     <script src="/app/js/main.js"></script>
-    <script type="text/javascript">
-      function init() {
-        let resp = POC.Actions.getExistingCredentials();
-        showResp('credentials', JSON.stringify(resp));
-        console.log(resp);
-      }
-      function createNewCredentials() {
-        POC.Operations.getNewCredentials().then(resp => {
-          showResp('credentials', JSON.stringify(resp));
-        });
-      }
-      function showResp(id, resp) {
-        document.getElementById(id).innerText = resp;
-      }
-      function getUserMedia() {
-        return POC.Actions.getUserMediaPermission();
-      }
-      function createNewRTCPeerConnection() {
-        POC.Actions.createNewRTCPeerConnection();
-      }
-      function makeCall() {}
-    </script>
+    <script type="text/javascript"></script>
   </head>
   <body onload="init()">
     <!-- <video sytle="display:none;" id="previewVideo"></video> -->
@@ -40,6 +18,10 @@
       </source>
       Your browser does not support the audio format.
     </audio> -->
+    <div>
+      User Name: <input type="text" id="userName" />
+      <button onclick="registerWMS();">Register</button>
+    </div>
     <div>
       Existing Credentials :
       <span id="credentials"></span><br />
@@ -60,36 +42,4 @@
     </div>
     <div id="zd_log" style="display:none"></div>
   </body>
-  <!-- <script>
-    (function() {
-      // var message = {};
-      var con = console;
-      var realLog = con.log;
-      var realInfo = con.info;
-      var realError = con.error;
-      var realException = con.exception;
-
-      con.log = function(message) {
-        _print(arguments);
-        realLog.apply(con, arguments);
-      };
-      con.info = function(message) {
-        _print(arguments);
-        realLog.apply(con, arguments);
-      };
-      con.error = function(message) {
-        _print(arguments);
-        realLog.apply(con, arguments);
-      };
-      con.exception = function(message) {
-        _print(arguments);
-        realLog.apply(con, arguments);
-      };
-      _print = function() {
-        var message = {};
-        document.getElementById('zd_log').innerHTML +=
-          '<p>' + JSON.stringify(arguments) + '</p>';
-      };
-    })();
-  </script> -->
 </html>

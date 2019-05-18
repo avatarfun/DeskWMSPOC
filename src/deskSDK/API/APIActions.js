@@ -1,5 +1,5 @@
 import RequestAPI from './RequestAPI';
-const providerDomain = 'https://rajesh-zt35.tsi.zohocorpin.com:8443';
+const providerDomain = ''; //'https://rajesh-zt35.tsi.zohocorpin.com:8443';
 
 export function getCredentials(userId) {
   const actionUrl = `${providerDomain}/support/PublicCallAction.do?action=getCredentials&userId=${userId}`;
@@ -8,6 +8,11 @@ export function getCredentials(userId) {
 export function notifyP2PMessage(userId, messageType, message) {
   const actionUrl = `${providerDomain}/support/PublicCallAction.do?action=notifyP2PMessage`;
   return RequestAPI(actionUrl).post({ userId, messageType, message });
+}
+
+export function getAnonId(displayName) {
+  const actionUrl = `${providerDomain}/support/PublicCallAction.do?action=getAnonId&displayName=${displayName}`;
+  return RequestAPI(actionUrl).get();
 }
 // /**
 //  * @param {*} roomId

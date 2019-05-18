@@ -1,29 +1,18 @@
-import { getCredentials, notifyP2PMessage } from '../API/APIActions';
+import { getCredentials, notifyP2PMessage, getAnonId } from '../API/APIActions';
 import Storage from '../Utils/Storage';
 import ZD_Connection from '../Utils/ZD_Connection';
 import ZD_Stream from '../Utils/ZD_Stream';
+import ZD_WMS_handler from '../Utils/WMS_handler';
 const userInfo = new Storage('userInfo');
+
 const POC = {
   Operations: {
-    getNewCredentials(userId = 12345) {
-      const resp = getCredentials(userId);
-      userInfo.set(userId, { userId, credentials: resp });
-      return resp;
-    },
-    notifyP2PMessage(userId, messageType = 'candidate', message) {
-      return notifyP2PMessage(userId, messageType, message);
-    },
-    makeNewRTCPeerConnection() {
-      new Promise((_succ, _fail) => {});
-      return;
-    }
-  },
-  Actions: {
     getUserMediaPermission() {
       return _getUserMediaPermission();
     },
-    getExistingCredentials(userId = 12345) {
-      const details = userInfo.get(userId);
+    getExistingCredentials() {
+      const { anonId } = POC.Operations.getExistingRegisteredUserDetails();
+      const details = userInfo.get(anonId);
       const { credentials = {} } = details || {};
       return credentials;
     },
@@ -40,6 +29,41 @@ const POC = {
       ZD_Stream.hasLocalStream
         ? _cbk(ZD_Stream.getLocalStream())
         : _getUserMediaPermission().then(_cbk);
+    },
+    registerWMS(userName) {
+      const { anonId } = POC.Operations.getExistingRegisteredUserDetails();
+      const _cbk = anonId => ZD_WMS_handler.registerWMS(anonId, userName);
+      return new Promise((_succ, _fail) => {
+        if (anonId) {
+          return _cbk(anonId);
+        }
+        return POC.Actions.getAnonId(userName).then(resp => _cbk(resp.anonId));
+      });
+    },
+    getExistingRegisteredUserDetails() {
+      return ZD_WMS_handler.getAnonDetails();
+    },
+    getSTUN_TURNCredentials() {
+      const { anonId } = POC.Operations.getExistingRegisteredUserDetails();
+      return POC.Actions.getNewCredentials(anonId).then(resp => {
+        userInfo.set(anonId, { anonId, credentials: resp });
+        return resp;
+      });
+    }
+  },
+  Actions: {
+    getNewCredentials(userId) {
+      return getCredentials(userId);
+    },
+    notifyP2PMessage(userId, messageType = 'candidate', message) {
+      console.log(userId, messageType, message);
+      // return notifyP2PMessage(userId, messageType, message);
+    },
+    makeNewRTCPeerConnection() {
+      return new Promise((_succ, _fail) => {});
+    },
+    getAnonId(displayName) {
+      return getAnonId(displayName);
     }
   },
   ZD_WebRTC: { Streams: ZD_Stream, Conn: ZD_Connection }
@@ -122,7 +146,7 @@ const _getIceServerList = () => {
       turnurls,
       credential,
       username
-    } = POC.Actions.getExistingCredentials(),
+    } = POC.Operations.getExistingCredentials(),
     stunurl = { url: `stun:${turnurls}` },
     turnurl = {
       url: `turn:${turnurls}?transport=tcp`,
@@ -144,11 +168,10 @@ const _onicecandidate = evt => {
     const userId = '12345';
     const message = JSON.stringify({
       type: 'candidate',
-      label: evt.candidate.sdpMLineIndex,
       id: evt.candidate.sdpMid,
       candidate: evt.candidate.candidate
     });
-    POC.Operations.notifyP2PMessage(userId, messageType, message);
+    POC.Actions.notifyP2PMessage(userId, messageType, message);
   } catch (e) {
     console.log(e);
   }
