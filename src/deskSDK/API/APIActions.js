@@ -5,9 +5,9 @@ export function getCredentials(userId) {
   const actionUrl = `${providerDomain}/support/PublicCallAction.do?action=getCredentials&userId=${userId}`;
   return RequestAPI(actionUrl).get();
 }
-export function notifyP2PMessage(userId, messageType, message) {
+export function notifyP2PMessage(message) {
   const actionUrl = `${providerDomain}/support/PublicCallAction.do?action=notifyP2PMessage`;
-  return RequestAPI(actionUrl).post({ userId, messageType, message });
+  return RequestAPI(actionUrl).post({ message });
 }
 
 export function getAnonId(displayName) {

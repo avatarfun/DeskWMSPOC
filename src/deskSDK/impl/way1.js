@@ -20,11 +20,10 @@ const POC = {
       const _cbk = stream => {
         const iceServerlist = _getIceServerList();
         ZD_Connection.addcandidate = _onicecandidate;
-        return ZD_Connection.init(iceServerlist)
-          .addStream(stream)
-          .createOffer()
-          .then(ZD_Connection.setLocalDescription)
-          .catch(err => console.log(err));
+        return ZD_Connection.init(iceServerlist).addStream(stream);
+        // .createOffer()
+        //   .then(ZD_Connection.setLocalDescription)
+        //   .catch(err => console.log(err))
       };
       ZD_Stream.hasLocalStream
         ? _cbk(ZD_Stream.getLocalStream())
@@ -55,9 +54,8 @@ const POC = {
     getNewCredentials(userId) {
       return getCredentials(userId);
     },
-    notifyP2PMessage(userId, messageType = 'candidate', message) {
-      console.log(userId, messageType, message);
-      // return notifyP2PMessage(userId, messageType, message);
+    notifyP2PMessage(userId, messageType, message) {
+      return notifyP2PMessage(userId, messageType, message);
     },
     makeNewRTCPeerConnection() {
       return new Promise((_succ, _fail) => {});
@@ -100,7 +98,7 @@ const _getUserMediaDetails = function() {
               var _device = { deviceId: exact };
               gumConstraints.audio = _device;
             } catch (something) {
-              //                            console.log("something",something);
+              //console.log("something",something);
             }
           }
           if (device.kind == 'videoinput') {
@@ -147,43 +145,36 @@ const _getIceServerList = () => {
       credential,
       username
     } = POC.Operations.getExistingCredentials(),
-    stunurl = { url: `stun:${turnurls}` },
+    stunurl = { urls: `stun:${turnurls}` },
     turnurl = {
-      url: `turn:${turnurls}?transport=tcp`,
+      urls: `turn:${turnurls}?transport=tcp`,
       username: username,
       credential: credential
     },
-    turnurl1 = {
-      url: `turn:${turnurls}?transport=tcp`,
-      username: username,
-      credential: credential
-    },
-    iceservers = [stunurl, turnurl, turnurl1],
+    // turnurl1 = {
+    //   urls: `turn:${turnurls}?transport=tcp`,
+    //   username: username,
+    //   credential: credential
+    // },
+    iceservers = [stunurl, turnurl],
     iceServerlist = { iceServers: iceservers };
   return iceServerlist;
 };
 const _onicecandidate = evt => {
   try {
+    const { anonId } = POC.Operations.getExistingRegisteredUserDetails();
     const messageType = 'candidate';
-    const userId = '12345';
     const message = JSON.stringify({
-      type: 'candidate',
-      id: evt.candidate.sdpMid,
       candidate: evt.candidate.candidate
     });
-    POC.Actions.notifyP2PMessage(userId, messageType, message);
+    POC.Actions.notifyP2PMessage(anonId, messageType, message);
   } catch (e) {
     console.log(e);
   }
 };
+const _handleCustomeMessages = msg => {
+  const { message } = msg;
+  console.log(message);
 
-(() => {
-  if (navigator.mozGetUserMedia) {
-    RTCIceCandidate = mozRTCIceCandidate;
-    RTCSessionDescription = mozRTCSessionDescription;
-    RTCPeerConnection = mozRTCPeerConnection;
-  } //For Chrome
-  else {
-    RTCPeerConnection = webkitRTCPeerConnection;
-  }
-})();
+  
+};
