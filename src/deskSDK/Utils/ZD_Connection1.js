@@ -26,12 +26,13 @@ function createPeerConnection(iceServerlist) {
 }
 const _handleICECandidateEvent = event => {
   if (event.candidate) {
-    SignalingServer.send({
+    const msg = {
       callRefId: callRefId,
-      type: NEW_ICE_CANDIDATE,
-      target: targetUsername,
+      userId: userId,
+      action: NEW_ICE_CANDIDATE,
       candidate: event.candidate
-    });
+    };
+    SignalingServer.send(msg);
   }
 };
 const _handleTrackEvent = evt => {};
@@ -40,11 +41,10 @@ const _handleNegotiationNeededEvent = evt => {
     .createOffer()
     .then(offer => myPeerConnection.setLocalDescription(offer))
     .then(() => {
-      let msg = {
+      const msg = {
         callRefId: callRefId,
         userId: userId,
-        target: targetUsername,
-        type: VIDEO_OFFER,
+        action: VIDEO_OFFER,
         sdp: myPeerConnection.localDescription
       };
       SignalingServer.send(msg);
@@ -75,12 +75,7 @@ const makeCall = (invite = function(evt, userId) {
   }
 });
 
-const answerCall = (handleVideoOfferMsg = function(
-  iceServerlist,
-  userId,
-  targetUsername,
-  msg
-) {
+const answerCall = (handleVideoOfferMsg = function(iceServerlist, userId, msg) {
   let localStream = null;
   createPeerConnection(iceServerlist);
   let desc = new RTCSessionDescription(msg.sdp);
@@ -98,11 +93,10 @@ const answerCall = (handleVideoOfferMsg = function(
     .then(() => myPeerConnection.createAnswer())
     .then(answer => myPeerConnection.setLocalDescription(answer))
     .then(() => {
-      let msg = {
+      const msg = {
         callRefId: callRefId,
-        name: userId,
-        target: targetUsername,
-        type: VIDEO_ANSWER,
+        userId: userId,
+        action: VIDEO_ANSWER,
         sdp: myPeerConnection.localDescription
       };
       SignalingServer.send(msg);

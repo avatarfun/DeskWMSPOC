@@ -1,4 +1,5 @@
-import { default as POC } from './deskSDK/impl/way1';
+// import { default as POC } from './deskSDK/impl/way1';
+import { default as POC } from './deskSDK/impl/way2';
 import * as global from './deskSDK/Utils/global.js';
 window.POC = POC;
 

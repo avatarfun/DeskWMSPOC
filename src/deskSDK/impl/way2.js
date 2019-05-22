@@ -1,6 +1,6 @@
 import { getCredentials, notifyP2PMessage, getAnonId } from '../API/APIActions';
 import Storage from '../Utils/Storage';
-import ZD_Connection from '../Utils/ZD_Connection';
+import ZD_Connection from '../Utils/ZD_Connection1';
 import ZD_Stream from '../Utils/ZD_Stream';
 import ZD_WMS_handler from '../Utils/WMS_handler';
 const userInfo = new Storage('userInfo');
@@ -16,19 +16,7 @@ const POC = {
       const { credentials = {} } = details || {};
       return credentials;
     },
-    createNewRTCPeerConnection() {
-      const _cbk = stream => {
-        const iceServerlist = _getIceServerList();
-        ZD_Connection.addcandidate = _onicecandidate;
-        return ZD_Connection.init(iceServerlist).addStream(stream);
-        // .createOffer()
-        //   .then(ZD_Connection.setLocalDescription)
-        //   .catch(err => console.log(err))
-      };
-      ZD_Stream.hasLocalStream
-        ? _cbk(ZD_Stream.getLocalStream())
-        : _getUserMediaPermission().then(_cbk);
-    },
+    createNewRTCPeerConnection() {},
     registerWMS(userName) {
       const { anonId } = POC.Operations.getExistingRegisteredUserDetails();
       const _cbk = anonId => ZD_WMS_handler.registerWMS(anonId, userName);
@@ -63,8 +51,7 @@ const POC = {
     getAnonId(displayName) {
       return getAnonId(displayName);
     }
-  },
-  ZD_WebRTC: { Streams: ZD_Stream, Conn: ZD_Connection }
+  }
 };
 
 export default POC;
@@ -160,18 +147,7 @@ const _getIceServerList = () => {
     iceServerlist = { iceServers: iceservers };
   return iceServerlist;
 };
-const _onicecandidate = evt => {
-  try {
-    const { anonId } = POC.Operations.getExistingRegisteredUserDetails();
-    const messageType = 'candidate';
-    const message = JSON.stringify({
-      candidate: evt.candidate.candidate
-    });
-    POC.Actions.notifyP2PMessage(anonId, messageType, message);
-  } catch (e) {
-    console.log(e);
-  }
-};
+const _onicecandidate = evt => {};
 const _handleCustomeMessages = msg => {
   const { message } = msg;
   console.log(message);

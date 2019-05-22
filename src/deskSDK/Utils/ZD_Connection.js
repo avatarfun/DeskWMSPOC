@@ -38,14 +38,13 @@ const ZD_Connection = {
 export default ZD_Connection;
 const _onnegotiationneeded = async evt => {
   debugger;
-  try {
-    await pc.setLocalDescription(await pc.createOffer());
-    ZD_Connection.createOffer()
-      .then(ZD_Connection.setLocalDescription)
-      .catch(err => console.log(err));
-    // signaling.send({ desc: pc.localDescription });
-  } catch (err) {
-    console.error(err);
-  }
+  // try {
+  //   await pc.setLocalDescription(await pc.createOffer());
+  //   ZD_Connection.createOffer()
+  //     .then(ZD_Connection.setLocalDescription)
+  //     .catch(err => console.log(err));
+  //   // signaling.send({ desc: pc.localDescription });
+  // } catch (err) {
+  //   console.error(err);
+  // }
 };
-
