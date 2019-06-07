@@ -2,8 +2,13 @@ export function init() {
   let resp = POC.Operations.getExistingCredentials();
   showResp('credentials', JSON.stringify(resp));
   console.log(resp);
-  const { anonName } = POC.Operations.getExistingRegisteredUserDetails();
+  const {
+    anonName,
+    anonId
+  } = POC.Operations.getExistingRegisteredUserDetails();
   anonName && (document.getElementById('userName').value = anonName);
+  anonId && registerWMS();
+
   //   loadWMS();
 }
 // export function loadWMS() {
@@ -31,10 +36,10 @@ export function showResp(id, resp) {
 export function getUserMedia() {
   return POC.Operations.getUserMediaPermission();
 }
-export function createNewRTCPeerConnection() {
-  POC.Operations.createNewRTCPeerConnection();
+
+export function makeCall() {
+  POC.Operations.makeCall();
 }
-export function makeCall() {}
 
 export default (global = {
   init,
@@ -43,6 +48,6 @@ export default (global = {
   createNewCredentials,
   showResp,
   getUserMedia,
-  createNewRTCPeerConnection,
+
   makeCall
 });

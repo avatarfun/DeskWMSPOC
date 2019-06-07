@@ -4,46 +4,84 @@ import {
   NEW_ICE_CANDIDATE
 } from '../Utils/Constants';
 import SignalingServer from '../Utils/SignalingServer';
-let userId;
+let _userId;
+
 let myPeerConnection = undefined;
+let remotePeerConnection = undefined;
 let callRefId = 'AvatarTest1';
 let mediaConstraints = {
   audio: true, // We want an audio track
   video: true // ...and we want a video track
 };
-function createPeerConnection(iceServerlist) {
-  if (myPeerConnection == undefined) {
-    myPeerConnection = new RTCPeerConnection(iceServerlist);
-    myPeerConnection.onicecandidate = _handleICECandidateEvent;
-    myPeerConnection.ontrack = _handleTrackEvent;
-    myPeerConnection.onnegotiationneeded = _handleNegotiationNeededEvent;
-    myPeerConnection.onremovetrack = _handleRemoveTrackEvent;
-    myPeerConnection.oniceconnectionstatechange = _handleICEConnectionStateChangeEvent;
-    myPeerConnection.onicegatheringstatechange = _handleICEGatheringStateChangeEvent;
-    myPeerConnection.onsignalingstatechange = _handleSignalingStateChangeEvent;
+let _iceServerlist = {};
+const ZD_Connection1 = {
+  setIceServerList(iceServerlist) {
+    _iceServerlist = iceServerlist;
+  },
+  setUserId(userId) {
+    _userId = userId;
+  },
+  handleSignalMessage(msg) {
+    const { action } = msg;
+    if (action == NEW_ICE_CANDIDATE) {
+      // invite();
+      handleNewICECandidateMsg(msg);
+    } else if (action == VIDEO_OFFER) {
+      console.log(msg);
+      handleVideoOfferMsg(_iceServerlist, msg);
+    } else if (action == VIDEO_ANSWER) {
+      console.log(msg);
+      onAnswer(msg);
+    }
+  },
+  hangUpCall() {
+    hangUpCall();
+  },
+  makeCall(anonId) {
+    invite(_iceServerlist, anonId);
   }
+};
+export default ZD_Connection1;
+
+function createPeerConnection(iceServerlist, createOffer) {
+  myPeerConnection = new RTCPeerConnection(iceServerlist);
+  myPeerConnection.onicecandidate = handleICECandidateEvent;
+  myPeerConnection.ontrack = handleTrackEvent;
+
+  createOffer &&
+    (myPeerConnection.onnegotiationneeded = handleNegotiationNeededEvent);
+  myPeerConnection.onremovetrack = handleRemoveTrackEvent;
+  myPeerConnection.oniceconnectionstatechange = handleICEConnectionStateChangeEvent;
+  myPeerConnection.onicegatheringstatechange = handleICEGatheringStateChangeEvent;
+  myPeerConnection.onsignalingstatechange = handleSignalingStateChangeEvent;
+  // myPeerConnection.onaddstream = addremotestream;
+
   return myPeerConnection;
 }
-const _handleICECandidateEvent = event => {
+const handleICECandidateEvent = event => {
   if (event.candidate) {
     const msg = {
       callRefId: callRefId,
-      userId: userId,
+      userId: _userId,
       action: NEW_ICE_CANDIDATE,
       candidate: event.candidate
     };
     SignalingServer.send(msg);
   }
 };
-const _handleTrackEvent = evt => {};
-const _handleNegotiationNeededEvent = evt => {
+function handleTrackEvent(event) {
+  document.getElementById('received_video').srcObject = event.streams[0];
+  document.getElementById('hangup-button').disabled = false;
+}
+const handleNegotiationNeededEvent = evt => {
+  console.log(evt);
   myPeerConnection
     .createOffer()
     .then(offer => myPeerConnection.setLocalDescription(offer))
     .then(() => {
       const msg = {
         callRefId: callRefId,
-        userId: userId,
+        userId: _userId,
         action: VIDEO_OFFER,
         sdp: myPeerConnection.localDescription
       };
@@ -51,17 +89,63 @@ const _handleNegotiationNeededEvent = evt => {
     })
     .catch(err => err);
 };
-const _handleRemoveTrackEvent = evt => {};
-const _handleICEConnectionStateChangeEvent = evt => {};
-const _handleICEGatheringStateChangeEvent = evt => {};
-const _andleSignalingStateChangeEvent = evt => {};
+function handleRemoveTrackEvent(event) {
+  debugger;
+  let stream = document.getElementById('received_video').srcObject;
+  let trackList = stream.getTracks();
 
-const makeCall = (invite = function(evt, userId) {
-  userId = userId;
+  if (trackList.length == 0) {
+    closeVideoCall();
+  }
+}
+function handleICEConnectionStateChangeEvent(event) {
+  switch (myPeerConnection.iceConnectionState) {
+    case 'closed':
+    case 'failed':
+    case 'disconnected':
+      closeVideoCall();
+      break;
+  }
+}
+function handleICEGatheringStateChangeEvent(event) {
+  // Our sample just logs information to console here,
+  // but you can do whatever you need.
+}
+function handleSignalingStateChangeEvent(event) {
+  switch (myPeerConnection.signalingState) {
+    case 'closed':
+      closeVideoCall();
+      break;
+  }
+}
+function addremotestream(event) {
+  try {
+    // remoteVideo = document.createElement('video');
+    // remoteVideo.src = window.URL.createObjectURL(event.stream);
+    // remoteStream = event.stream;
+    // handleTrackEvent(event);
+    document.getElementById('received_video').srcObject = event.streams;
+    document.getElementById('hangup-button').disabled = false;
+  } catch (e) {
+    console.log(`Remotevideo src error:${e}`);
+  }
+}
+//WMS Message Handling Started
+function handleNewICECandidateMsg(msg) {
+  const candidate = new RTCIceCandidate(msg.candidate);
+
+  // console.log('handleNewICECandidateMsg-myPeerConnection ', myPeerConnection);
+  myPeerConnection &&
+    myPeerConnection.addIceCandidate(candidate).catch(reportError);
+}
+//WMS Message Handling ENDED
+// IMPL started --------------------------------------------------------------------------------------------
+const invite = function(iceServerlist, userId) {
+  _userId = userId;
   if (myPeerConnection) {
     console.log('You can\'t start a call because you already have one open!');
   } else {
-    createPeerConnection(iceServerlist);
+    myPeerConnection = createPeerConnection(iceServerlist, true);
 
     navigator.mediaDevices
       .getUserMedia(mediaConstraints)
@@ -71,20 +155,20 @@ const makeCall = (invite = function(evt, userId) {
           .getTracks()
           .forEach(track => myPeerConnection.addTrack(track, localStream));
       })
-      .catch(handleGetUserMediaError => handleGetUserMediaError);
+      .catch(handleGetUserMediaError);
   }
-});
+};
 
-const answerCall = (handleVideoOfferMsg = function(iceServerlist, userId, msg) {
+const handleVideoOfferMsg = function(iceServerlist, msg) {
   let localStream = null;
-  createPeerConnection(iceServerlist);
+  myPeerConnection = createPeerConnection(iceServerlist);
   let desc = new RTCSessionDescription(msg.sdp);
   myPeerConnection
     .setRemoteDescription(desc)
     .then(() => navigator.mediaDevices.getUserMedia(mediaConstraints))
     .then(stream => {
       localStream = stream;
-      document.getElementById('remote_video').srcObject = localStream;
+      document.getElementById('local_video').srcObject = localStream;
 
       localStream
         .getTracks()
@@ -95,15 +179,93 @@ const answerCall = (handleVideoOfferMsg = function(iceServerlist, userId, msg) {
     .then(() => {
       const msg = {
         callRefId: callRefId,
-        userId: userId,
+        userId: _userId,
         action: VIDEO_ANSWER,
         sdp: myPeerConnection.localDescription
       };
       SignalingServer.send(msg);
     })
-    .catch(handleGetUserMediaError => handleGetUserMediaError);
-});
+    .catch(handleGetUserMediaError);
+};
+//when another user answers to our offer
+function onAnswer(msg) {
+  myPeerConnection.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+}
 
+// const handleVideoOfferMsg = function(iceServerlist, msg) {
+//   let localStream = null;
+//   remotePeerConnection = createPeerConnection(iceServerlist);
+//   let desc = new RTCSessionDescription(msg.sdp);
+//   remotePeerConnection
+//     .setRemoteDescription(desc)
+//     .then(() => navigator.mediaDevices.getUserMedia(mediaConstraints))
+//     .then(stream => {
+//       localStream = stream;
+//       document.getElementById('local_video').srcObject = localStream;
+
+//       localStream
+//         .getTracks()
+//         .forEach(track => remotePeerConnection.addTrack(track, localStream));
+//     })
+//     .then(() => remotePeerConnection.createAnswer())
+//     .then(answer => remotePeerConnection.setLocalDescription(answer))
+//     .then(() => {
+//       const msg = {
+//         callRefId: callRefId,
+//         userId: _userId,
+//         action: VIDEO_ANSWER,
+//         sdp: remotePeerConnection.localDescription
+//       };
+//       SignalingServer.send(msg);
+//     })
+//     .catch(handleGetUserMediaError);
+// };
+function hangUpCall() {
+  debugger;
+  closeVideoCall();
+  sendToServer({
+    name: myUsername,
+    target: targetUsername,
+    type: 'hang-up'
+  });
+}
+function closeVideoCall() {
+  debugger;
+  let remoteVideo = document.getElementById('received_video');
+  let localVideo = document.getElementById('local_video');
+
+  if (myPeerConnection) {
+    myPeerConnection.ontrack = null;
+    myPeerConnection.onremovetrack = null;
+    myPeerConnection.onremovestream = null;
+    myPeerConnection.onicecandidate = null;
+    myPeerConnection.oniceconnectionstatechange = null;
+    myPeerConnection.onsignalingstatechange = null;
+    myPeerConnection.onicegatheringstatechange = null;
+    myPeerConnection.onnegotiationneeded = null;
+
+    if (remoteVideo.srcObject) {
+      remoteVideo.srcObject.getTracks().forEach(track => track.stop());
+    }
+
+    if (localVideo.srcObject) {
+      localVideo.srcObject.getTracks().forEach(track => track.stop());
+    }
+
+    myPeerConnection.close();
+    myPeerConnection = null;
+  }
+
+  remoteVideo.removeAttribute('src');
+  remoteVideo.removeAttribute('srcObject');
+  localVideo.removeAttribute('src');
+  remoteVideo.removeAttribute('srcObject');
+
+  document.getElementById('hangup-button').disabled = true;
+}
+
+// IMPL ENDED --------------------------------------------------------------------------------------------
+//Error Handling Started
 function handleGetUserMediaError(e) {
   switch (e.name) {
     case 'NotFoundError':
@@ -123,8 +285,7 @@ function handleGetUserMediaError(e) {
 
   closeVideoCall();
 }
-function handleNewICECandidateMsg(msg) {
-  let candidate = new RTCIceCandidate(msg.candidate);
-
-  myPeerConnection.addIceCandidate(candidate).catch(reportError);
+function reportError(err) {
+  console.log(err);
 }
+//Error Handling Ended

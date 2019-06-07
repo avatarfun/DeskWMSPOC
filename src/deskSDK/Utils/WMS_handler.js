@@ -2,6 +2,9 @@ import Storage from './Storage';
 const userWMSInfo = new Storage('userWMSInfo');
 let _isWMSInit = false;
 const ZD_WMS_handler = {
+  handleCustomeMessages(msg) {
+    console.log(msg);
+  },
   registerWMS(anonId, anonName) {
     const _cbk = () => {
       userWMSInfo.set('anonId', anonId);
@@ -10,6 +13,9 @@ const ZD_WMS_handler = {
       // WmsLite.allowCrossOrigin('https://rajesh-zt35.tsi.zohocorpin.com:8443');
       WmsLite.setWmsContext('_wms');
       WmsLite.registerAnnon('ZS', anonId, anonName);
+      WmsliteImpl.handleMessage = function(mtype, msg) {
+        ZD_WMS_handler.handleCustomeMessages(msg);
+      };
       return true;
     };
     return new Promise((_succ, _fail) =>

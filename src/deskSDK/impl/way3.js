@@ -1,9 +1,9 @@
 import { getCredentials, notifyP2PMessage, getAnonId } from '../API/APIActions';
 import Storage from '../Utils/Storage';
-import ZD_Connection1 from '../Utils/ZD_Connection1';
-import ZD_Stream from '../Utils/ZD_Stream';
+import ZD_Connection2 from '../Utils/ZD_Connection2';
+
 import ZD_WMS_handler from '../Utils/WMS_handler';
-import { makeCall } from '../Utils/global';
+
 const userInfo = new Storage('userInfo');
 
 const POC = {
@@ -21,7 +21,7 @@ const POC = {
       const { anonId } = POC.Operations.getExistingRegisteredUserDetails();
       ZD_WMS_handler.handleCustomeMessages = _handleCustomeMessages;
       const _cbk = anonId => (
-        ZD_Connection1.setUserId(anonId),
+        ZD_Connection2.setUserId(anonId),
         ZD_WMS_handler.registerWMS(anonId, userName)
       );
 
@@ -43,12 +43,12 @@ const POC = {
       });
     },
     hangUpCall() {
-      ZD_Connection1.hangUpCall();
+      ZD_Connection2.hangUpCall();
     },
     makeCall() {
-      ZD_Connection1.setIceServerList(_getIceServerList());
+      ZD_Connection2.setIceServerList(_getIceServerList());
       const { anonId } = POC.Operations.getExistingRegisteredUserDetails();
-      ZD_Connection1.makeCall(anonId);
+      ZD_Connection2.makeCall(anonId);
     }
   },
   Actions: {
@@ -70,7 +70,7 @@ const POC = {
 const _handleCustomeMessages = msg => {
   let { module, message } = msg;
   if (module == 'POC') {
-    ZD_Connection1.handleSignalMessage(message);
+    ZD_Connection2.handleSignalMessage(message);
   }
 };
 
