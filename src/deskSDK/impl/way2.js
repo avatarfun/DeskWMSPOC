@@ -1,9 +1,14 @@
-import { getCredentials, notifyP2PMessage, getAnonId } from '../API/APIActions';
+import {
+  getCredentials,
+  notifyP2PMessage,
+  getAnonId,
+  ringToAgent
+} from '../API/APIActions';
 import Storage from '../Utils/Storage';
 import ZD_Connection1 from '../Utils/ZD_Connection1';
-import ZD_Stream from '../Utils/ZD_Stream';
+// import ZD_Stream from '../Utils/ZD_Stream';
 import ZD_WMS_handler from '../Utils/WMS_handler';
-import { makeCall } from '../Utils/global';
+// import { makeCall } from '../Utils/global';
 const userInfo = new Storage('userInfo');
 
 const POC = {
@@ -48,7 +53,13 @@ const POC = {
     makeCall() {
       ZD_Connection1.setIceServerList(_getIceServerList());
       const { anonId } = POC.Operations.getExistingRegisteredUserDetails();
-      ZD_Connection1.makeCall(anonId);
+      const callRefId = `POC_${new Date().getTime()}`;
+      ZD_Connection1.makeCall(anonId), callRefId;
+    },
+    ringToAgent() {
+      const { anonId } = POC.Operations.getExistingRegisteredUserDetails();
+      const callRefId = `POC_${new Date().getTime()}`;
+      ringToAgent(callRefId, anonId);
     }
   },
   Actions: {

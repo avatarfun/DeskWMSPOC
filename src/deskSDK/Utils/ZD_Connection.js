@@ -37,7 +37,6 @@ const ZD_Connection = {
 };
 export default ZD_Connection;
 const _onnegotiationneeded = async evt => {
-  debugger;
   // try {
   //   await pc.setLocalDescription(await pc.createOffer());
   //   ZD_Connection.createOffer()

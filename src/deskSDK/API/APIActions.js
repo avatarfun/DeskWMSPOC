@@ -14,6 +14,11 @@ export function getAnonId(displayName) {
   const actionUrl = `${providerDomain}/support/PublicCallAction.do?action=getAnonId&displayName=${displayName}`;
   return RequestAPI(actionUrl).get();
 }
+export function ringToAgent(callRefId, anonId) {
+  const actionUrl = `${providerDomain}/support/PublicCallAction.do?action=makeCall&callRefId=${callRefId}&cxAnonId=${anonId}`;
+  return RequestAPI(actionUrl).get();
+}
+
 // /**
 //  * @param {*} roomId
 //  */

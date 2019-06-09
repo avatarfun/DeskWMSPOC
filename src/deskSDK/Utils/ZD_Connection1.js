@@ -7,7 +7,6 @@ import SignalingServer from '../Utils/SignalingServer';
 let _userId;
 
 let myPeerConnection = undefined;
-let remotePeerConnection = undefined;
 let callRefId = 'AvatarTest1';
 let mediaConstraints = {
   audio: true, // We want an audio track
@@ -37,7 +36,8 @@ const ZD_Connection1 = {
   hangUpCall() {
     hangUpCall();
   },
-  makeCall(anonId) {
+  makeCall(anonId, _callRefId) {
+    callRefId = _callRefId;
     invite(_iceServerlist, anonId);
   }
 };
@@ -161,6 +161,8 @@ const invite = function(iceServerlist, userId) {
 
 const handleVideoOfferMsg = function(iceServerlist, msg) {
   let localStream = null;
+  const { callRefId, agentId } = msg;
+
   myPeerConnection = createPeerConnection(iceServerlist);
   let desc = new RTCSessionDescription(msg.sdp);
   myPeerConnection
@@ -180,6 +182,7 @@ const handleVideoOfferMsg = function(iceServerlist, msg) {
       const msg = {
         callRefId: callRefId,
         userId: _userId,
+        agentId: agentId,
         action: VIDEO_ANSWER,
         sdp: myPeerConnection.localDescription
       };
