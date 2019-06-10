@@ -1,7 +1,8 @@
 import {
   VIDEO_OFFER,
   VIDEO_ANSWER,
-  NEW_ICE_CANDIDATE
+  NEW_ICE_CANDIDATE,
+  HANG_UP
 } from '../Utils/Constants';
 import SignalingServer from '../Utils/SignalingServer';
 let _userId;
@@ -224,12 +225,10 @@ function onAnswer(msg) {
 //     .catch(handleGetUserMediaError);
 // };
 function hangUpCall() {
-  debugger;
   closeVideoCall();
-  sendToServer({
-    name: myUsername,
-    target: targetUsername,
-    type: 'hang-up'
+  SignalingServer.send({
+    callRefId: callRefId,
+    action: HANG_UP
   });
 }
 function closeVideoCall() {
